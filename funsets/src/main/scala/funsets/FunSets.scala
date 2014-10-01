@@ -66,15 +66,18 @@ object FunSets {
    * Returns whether there exists a bounded integer within `s`
    * that satisfies `p`.
    */
-  def exists(s: Set, p: Int => Boolean): Boolean = forall(s,(x) => true) && p(_)
+  def exists(s: Set, p: Int => Boolean): Boolean = {
+    val a = false && p
+    forall(s,a)
+  }
+
+// exists should be implemented in terms of forall
+
 
   /**
    * Returns a set transformed by applying `f` to each element of `s`.
    */
-  def map(s: Set, f: Int => Int): Set =  {
-    def map2(s: Set, f: => Int => Int): Set = (x) => s(f(x))
-    map2(s, f)
-  }
+  def map(s: Set, f: Int => Int): Set =  ???
 
   /**
    * Displays the contents of a set

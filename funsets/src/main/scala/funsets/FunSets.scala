@@ -56,7 +56,7 @@ object FunSets {
   def forall(s: Set, p: Int => Boolean): Boolean = {
     def iter(a: Int): Boolean = {
       if ( a > bound ) true
-      else if ( s(a) && !p(a) ) false
+      else if ( s(a) && ! p(a) ) false
       else iter( a + 1 )
     }
     iter(-bound)
@@ -67,17 +67,15 @@ object FunSets {
    * that satisfies `p`.
    */
   def exists(s: Set, p: Int => Boolean): Boolean = {
-    val a = false && p
-    forall(s,a)
+    ! forall(s, (x) => ! p(x))
   }
-
-// exists should be implemented in terms of forall
-
 
   /**
    * Returns a set transformed by applying `f` to each element of `s`.
    */
-  def map(s: Set, f: Int => Int): Set =  ???
+  def map(s: Set, f: Int => Int): Set =  {
+    x => exists(s, y => f(y) == x)
+  }
 
   /**
    * Displays the contents of a set

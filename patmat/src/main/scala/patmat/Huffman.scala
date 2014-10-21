@@ -31,7 +31,7 @@ object Huffman {
 
   def chars(tree: CodeTree): List[Char] = tree match {
     case Fork(l,r,c,w) => c
-    case Leaf(c,w) => c
+    case Leaf(c,w) => List(c)
   }
 
   def makeCodeTree(left: CodeTree, right: CodeTree) =
@@ -95,7 +95,7 @@ object Huffman {
 
   def isort(freqs: List[Leaf]):List[Leaf] = freqs match {
     case List() => List()
-    case (c,x:xs) => (c,insert(x,isort(xs)))
+    case (c,x::xs) => (c,insert(x,isort(xs)))
   }
 
   def insert(x:Int,xs:List[Leaf]):List = xs match {

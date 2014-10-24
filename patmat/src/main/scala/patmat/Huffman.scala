@@ -88,19 +88,19 @@ object Huffman {
     case x::xs => if (x == c) (c,1 + count(c,xs)._2) else (c, count(c,xs)._2)
   }
 
-  def makeLeafList(chars: List[Char]): List[Leaf] = times(chars) match {
+  def makeLeafList(chars: List[(Char, Int)]): List[Leaf] = chars match {
     case List() => List()
-    case x::xs => new Leaf(x._1,x._2)::makeLeafList(xs)
+    case x::xs  => Leaf(x._1,x._2)::makeLeafList(xs)
   }
 
   def isort(freqs: List[Leaf]):List[Leaf] = freqs match {
     case List() => List()
-    case (c,x::xs) => (c,insert(x,isort(xs)))
+    case x::xs => insert(x,isort(xs))
   }
 
-  def insert(x:Int,xs:List[Leaf]):List = xs match {
-    case List() => List()
-    case y::ys => if (x < y) x::xs else y::insert(ys)
+  def insert(x:Leaf, xs:List[Leaf]):List[Leaf] = xs match {
+    case List() => List(x)
+    case y::ys  => if (x.weight <= y.weight) x::xs else y::insert(x, ys)
   }
 
   /**
@@ -110,12 +110,15 @@ object Huffman {
    * head of the list should have the smallest weight), where the weight
    * of a leaf is the frequency of the character.
    */
-  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = ???
+  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = isort(makeLeafList(freqs))
 
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-  def singleton(trees: List[CodeTree]): Boolean = ???
+  def singleton(trees: List[CodeTree]): Boolean = trees match {
+    case List() => false
+    case x::xs  => xs.isEmpty
+  }
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
@@ -129,7 +132,12 @@ object Huffman {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-  def combine(trees: List[CodeTree]): List[CodeTree] = ???
+  def combine(trees: List[CodeTree]): List[CodeTree] = {
+    if (trees.length > 2) trees.apply(0) + trees.apply(1)
+    else trees
+  }
+
+  def +(that: CodeTree): CodeTree = Fork(this, that, chars(this) ++ chars(that), weight(this) + weight(that))
 
   /**
    * This function will be called in the following way:
@@ -148,7 +156,9 @@ object Huffman {
    *    the example invocation. Also define the return type of the `until` function.
    *  - try to find sensible parameter names for `xxx`, `yyy` and `zzz`.
    */
-  def until(xxx: ???, yyy: ???)(zzz: ???): ??? = ???
+  def until(singleton: List[CodeTree], combine: List[CodeTree])(trees: List[CodeTree]): List[CodeTree] = {
+    trees.foldLeft(singleton) combine
+  }
 
   /**
    * This function creates a code tree which is optimal to encode the text `chars`.

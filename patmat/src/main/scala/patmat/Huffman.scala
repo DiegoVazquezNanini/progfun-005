@@ -115,10 +115,7 @@ object Huffman {
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-  def singleton(trees: List[CodeTree]): Boolean = trees match {
-    case List() => false
-    case x::xs  => xs.isEmpty
-  }
+  def singleton(trees: List[CodeTree]): Boolean = trees.length == 1
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
@@ -132,12 +129,15 @@ object Huffman {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-  def combine(trees: List[CodeTree]): List[CodeTree] = {
-    if (trees.length > 2) trees.apply(0) + trees.apply(1)
-    else trees
-  }
+  def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
+    case List()  => List()
+    case x :: xs => if (trees.length >= 2) union( makeCodeTree(x, xs.head), xs.tail) else trees
+    }
 
-  def +(that: CodeTree): CodeTree = Fork(this, that, chars(this) ++ chars(that), weight(this) + weight(that))
+  def union(f: Fork, trees: List[CodeTree]): List[CodeTree] = trees match {
+    case List() => f :: List()
+    case x::xs  => if (weight(f) < weight(x)) f :: trees else x :: union(f, xs)
+  }
 
   /**
    * This function will be called in the following way:
@@ -156,8 +156,9 @@ object Huffman {
    *    the example invocation. Also define the return type of the `until` function.
    *  - try to find sensible parameter names for `xxx`, `yyy` and `zzz`.
    */
-  def until(singleton: List[CodeTree], combine: List[CodeTree])(trees: List[CodeTree]): List[CodeTree] = {
-    trees.foldLeft(singleton) combine
+  def until(singleton: List[CodeTree] => Boolean, combine:List[CodeTree] => List[CodeTree])(trees: List[CodeTree]): List[CodeTree] = trees match {
+    case List() => List()
+    case x::xs  => if (singleton(trees)) trees else x :: until(singleton, combine)(xs)
   }
 
   /**
@@ -166,9 +167,10 @@ object Huffman {
    * The parameter `chars` is an arbitrary text. This function extracts the character
    * frequencies from that text and creates a code tree based on them.
    */
-  def createCodeTree(chars: List[Char]): CodeTree = ???
-
-
+  def createCodeTree(chars: List[Char]): CodeTree = chars match {
+    case List() => throw new Error("chars.empty")
+    case _      => until(singleton, combine)(makeOrderedLeafList(times(chars))).head
+    }
 
   // Part 3: Decoding
 
